@@ -3,6 +3,7 @@ from collections import namedtuple
 from sec_api import QueryApi
 
 from s1extract.api.keys import SEC_API_KEY
+import requests
 
 Firm = namedtuple("Firm", ("ticker_symbol", "year", "cusip"))
 
@@ -17,7 +18,7 @@ def get_firms():
     return firms
 
 
-def get_newest_s1(query_api: QueryApi, ticker: str):
+def get_s1_url(query_api: QueryApi, ticker: str):
     query = {
         "query": {
             "query_string": {
@@ -34,7 +35,11 @@ def get_newest_s1(query_api: QueryApi, ticker: str):
 
 def main():
     query_api = QueryApi(api_key=SEC_API_KEY)
-    s1 = get_newest_s1(query_api, "ACHN")
+    s1 = get_s1_url(query_api, "ACHN")
+
+    r = requests.get(s1)
+    with open("ACHN.htm", "wb") as f:
+        f.write(r.content)
 
     print(s1)
 
