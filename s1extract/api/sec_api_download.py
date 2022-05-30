@@ -17,12 +17,11 @@ def get_firms():
     return firms
 
 
-def main():
-    query_api = QueryApi(api_key=SEC_API_KEY)
+def get_newest_s1(query_api: QueryApi, ticker: str):
     query = {
         "query": {
             "query_string": {
-                "query": "ticker:(AAOI) AND formType:\"S-1\""
+                "query": f"ticker:{ticker} AND formType:\"S-1\""
             }
         },
         "from": "0",
@@ -30,8 +29,14 @@ def main():
         "sort": [{"filedAt": {"order": "desc"}}]
     }
     filings = query_api.get_filings(query)
+    return filings["filings"][0]["linkToFilingDetails"]
 
-    print(filings)
+
+def main():
+    query_api = QueryApi(api_key=SEC_API_KEY)
+    s1 = get_newest_s1(query_api, "ACHN")
+
+    print(s1)
 
 
 if __name__ == "__main__":
