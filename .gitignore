@@ -211,3 +211,6 @@ fabric.properties
 
 # Mac file
 .DS_Store
+
+# API Keys
+keys.py
