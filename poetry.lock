@@ -366,6 +366,17 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
 
 [[package]]
+name = "sec-api"
+version = "1.0.9"
+description = "SEC EDGAR Filings API"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+requests = "*"
+
+[[package]]
 name = "soupsieve"
 version = "2.3.2.post1"
 description = "A modern CSS selector implementation for Beautiful Soup."
@@ -430,7 +441,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "c350bd1fcd9433b359c98151efb56268bff2f724afffafa90e73c8f21870e168"
+content-hash = "ba23adf8e0bd1ef32b3de91e94b68704aa28b2984b9f9eacd092542594a1d9b5"
 
 [metadata.files]
 atomicwrites = [
@@ -767,6 +778,10 @@ reportlab = [
 requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
     {file = "requests-2.27.1.tar.gz", hash = "sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61"},
+]
+sec-api = [
+    {file = "sec-api-1.0.9.tar.gz", hash = "sha256:b3b877211c1cb19a73e2c7505873950e2142aa3f48c5d7c528d3ff7b3b2859cd"},
+    {file = "sec_api-1.0.9-py3-none-any.whl", hash = "sha256:274304dd3c6ede2dda176b41e37d47cdbb1d9ba8924b3937c0ec9eba7c652315"},
 ]
 soupsieve = [
     {file = "soupsieve-2.3.2.post1-py3-none-any.whl", hash = "sha256:3b2503d3c7084a42b1ebd08116e5f81aadfaea95863628c80a3b774a11b7c759"},
