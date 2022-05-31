@@ -1,5 +1,6 @@
 import csv
 from collections import namedtuple
+
 from sec_api import QueryApi, RenderApi
 
 from s1extract.api.keys import SEC_API_KEY
