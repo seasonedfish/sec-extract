@@ -11,7 +11,7 @@ QUERY_API = QueryApi(SEC_API_KEY)
 RENDER_API = RenderApi(SEC_API_KEY)
 
 
-def get_firms():
+def get_firms() -> list[Firm]:
     with open("IPO Firm list 2005-2019.csv") as f:
         reader = csv.reader(f)
         reader.__next__()  # Skip first row
@@ -41,7 +41,7 @@ def download_s1_html(ticker: str) -> None:
         f.write(html_string)
 
 
-def main():
+def main() -> None:
     first_five_firms = get_firms()[0:5]
     print(first_five_firms)
 
