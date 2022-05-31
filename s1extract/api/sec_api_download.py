@@ -14,10 +14,7 @@ def get_firms():
     with open("IPO Firm list 2005-2019.csv") as f:
         reader = csv.reader(f)
         reader.__next__()  # Skip first row
-        firms = tuple(
-            Firm(*row)
-            for row in reader
-        )
+        firms = [Firm(*row) for row in reader]
     return firms
 
 
