@@ -13,9 +13,10 @@ RENDER_API = RenderApi(SEC_API_KEY)
 def get_firms():
     with open("IPO Firm list 2005-2019.csv") as f:
         reader = csv.reader(f)
+        reader.__next__()  # Skip first row
         firms = tuple(
             Firm(*row)
-            for row in reader[1:]
+            for row in reader
         )
     return firms
 
@@ -43,7 +44,8 @@ def download_s1_html(ticker: str) -> None:
 
 
 def main():
-    download_s1_html("AAOI")
+    first_five_firms = get_firms()[0:5]
+    print(first_five_firms)
 
 
 if __name__ == "__main__":
