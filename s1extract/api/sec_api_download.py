@@ -1,11 +1,13 @@
 import csv
 from collections import namedtuple
-from sec_api import QueryApi
+from sec_api import QueryApi, RenderApi
 
 from s1extract.api.keys import SEC_API_KEY
-import requests
 
 Firm = namedtuple("Firm", ("ticker_symbol", "year", "cusip"))
+
+QUERY_API = QueryApi(SEC_API_KEY)
+RENDER_API = RenderApi(SEC_API_KEY)
 
 
 def get_firms():
@@ -18,7 +20,7 @@ def get_firms():
     return firms
 
 
-def get_s1_url(query_api: QueryApi, ticker: str):
+def get_s1_url(ticker: str) -> str:
     query = {
         "query": {
             "query_string": {
@@ -29,19 +31,17 @@ def get_s1_url(query_api: QueryApi, ticker: str):
         "size": "1",
         "sort": [{"filedAt": {"order": "desc"}}]
     }
-    filings = query_api.get_filings(query)
+    filings = QUERY_API.get_filings(query)
     return filings["filings"][0]["linkToFilingDetails"]
 
 
+def get_s1_htm(ticker: str) -> str:
+    url = get_s1_url(ticker)
+    return RENDER_API.get_filing(url)
+
+
 def main():
-    query_api = QueryApi(api_key=SEC_API_KEY)
-    s1 = get_s1_url(query_api, "ACHN")
-
-    r = requests.get(s1)
-    with open("ACHN.htm", "wb") as f:
-        f.write(r.content)
-
-    print(s1)
+    s1 = get_s1_url("ACHN")
 
 
 if __name__ == "__main__":
