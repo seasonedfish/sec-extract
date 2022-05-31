@@ -35,13 +35,15 @@ def get_s1_url(ticker: str) -> str:
     return filings["filings"][0]["linkToFilingDetails"]
 
 
-def get_s1_htm(ticker: str) -> str:
+def download_s1_html(ticker: str) -> None:
     url = get_s1_url(ticker)
-    return RENDER_API.get_filing(url)
+    html_string = RENDER_API.get_filing(url)
+    with open(f"s1_html/{ticker}.html", "w") as f:
+        f.write(html_string)
 
 
 def main():
-    s1 = get_s1_url("ACHN")
+    download_s1_html("AAOI")
 
 
 if __name__ == "__main__":
