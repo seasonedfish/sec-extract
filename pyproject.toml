@@ -16,7 +16,6 @@ requests = "^2.27.1"
 bs4 = "^0.0.1"
 lxml = "^4.8.0"
 termcolor = "^1.1.0"
-sec-api = "^1.0.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
