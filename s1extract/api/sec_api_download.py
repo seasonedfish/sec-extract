@@ -51,8 +51,8 @@ def download_s1_html(ticker: str) -> None:
 
 
 def main() -> None:
-    first_five_firms = get_firms()[0:5]
-    for firm in first_five_firms:
+    firms = get_firms()
+    for firm in firms:
         download_s1_html(firm.ticker_symbol)
 
 
