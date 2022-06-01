@@ -6,6 +6,8 @@ from sec_api import QueryApi, RenderApi
 
 from s1extract.api.keys import SEC_API_KEY
 
+from requests.exceptions import ConnectionError
+
 Firm = namedtuple("Firm", ("ticker_symbol", "year", "cusip"))
 
 QUERY_API = QueryApi(SEC_API_KEY)
@@ -45,14 +47,20 @@ def download_s1_html(ticker: str) -> None:
         print(e, file=sys.stderr)
         return
 
-    html_string = RENDER_API.get_filing(url)
+    try:
+        html_string = RENDER_API.get_filing(url)
+    except ConnectionError:
+        print(f"Could not download html for {ticker}", file=sys.stderr)
+        return
+
     with open(f"s1_html/{ticker}.html", "w") as f:
         f.write(html_string)
 
 
 def main() -> None:
     firms = get_firms()
-    for firm in firms:
+    start_index = firms.index(Firm("STVVY", "", "16938G107"))
+    for firm in firms[start_index:]:
         download_s1_html(firm.ticker_symbol)
 
 
