@@ -1,6 +1,5 @@
 import csv
 import sys
-from collections import namedtuple
 from pathlib import Path
 
 from sec_api import QueryApi, RenderApi
@@ -9,17 +8,15 @@ from s1extract.api.keys import SEC_API_KEY
 
 from requests.exceptions import ConnectionError
 
-Firm = namedtuple("Firm", ("ticker_symbol", "year", "cusip"))
-
 QUERY_API = QueryApi(SEC_API_KEY)
 RENDER_API = RenderApi(SEC_API_KEY)
 
 
-def get_firms() -> list[Firm]:
+def get_tickers() -> list[str]:
     with open("IPO Firm list 2005-2019.csv") as f:
         reader = csv.reader(f)
         reader.__next__()  # Skip first row
-        firms = [Firm(*row) for row in reader]
+        firms = [row[0] for row in reader]  # Get only the ticker
     return firms
 
 
@@ -63,10 +60,10 @@ def download_s1_html(ticker: str) -> None:
 
 
 def main() -> None:
-    firms = get_firms()
-    start_index = firms.index(Firm("STVVY", "", "16938G107"))
-    for firm in firms[start_index:]:
-        download_s1_html(firm.ticker_symbol)
+    tickers = get_tickers()
+    start_index = tickers.index("STVVY")
+    for ticker in tickers[start_index:]:
+        download_s1_html(ticker)
 
 
 if __name__ == "__main__":
