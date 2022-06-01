@@ -1,4 +1,5 @@
 import csv
+import sys
 from collections import namedtuple
 
 from sec_api import QueryApi, RenderApi
@@ -31,11 +32,19 @@ def get_s1_url(ticker: str) -> str:
         "sort": [{"filedAt": {"order": "desc"}}]
     }
     filings = QUERY_API.get_filings(query)
-    return filings["filings"][0]["linkToFilingDetails"]
+    try:
+        return filings["filings"][0]["linkToFilingDetails"]
+    except IndexError:
+        raise ValueError(f"No S-1 found for {ticker}")
 
 
 def download_s1_html(ticker: str) -> None:
-    url = get_s1_url(ticker)
+    try:
+        url = get_s1_url(ticker)
+    except ValueError as e:
+        print(str(e), file=sys.stderr)
+        return
+
     html_string = RENDER_API.get_filing(url)
     with open(f"s1_html/{ticker}.html", "w") as f:
         f.write(html_string)
@@ -43,7 +52,8 @@ def download_s1_html(ticker: str) -> None:
 
 def main() -> None:
     first_five_firms = get_firms()[0:5]
-    print(first_five_firms)
+    for firm in first_five_firms:
+        download_s1_html(firm.ticker_symbol)
 
 
 if __name__ == "__main__":
