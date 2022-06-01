@@ -42,7 +42,7 @@ def download_s1_html(ticker: str) -> None:
     try:
         url = get_s1_url(ticker)
     except ValueError as e:
-        print(str(e), file=sys.stderr)
+        print(e, file=sys.stderr)
         return
 
     html_string = RENDER_API.get_filing(url)
