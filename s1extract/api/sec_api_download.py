@@ -1,6 +1,7 @@
 import csv
 import sys
 from collections import namedtuple
+from pathlib import Path
 
 from sec_api import QueryApi, RenderApi
 
@@ -41,6 +42,10 @@ def get_s1_url(ticker: str) -> str:
 
 
 def download_s1_html(ticker: str) -> None:
+    destination_path = Path(f"s1_html/{ticker}.html")
+    if destination_path.exists():
+        return
+
     try:
         url = get_s1_url(ticker)
     except ValueError as e:
@@ -53,7 +58,7 @@ def download_s1_html(ticker: str) -> None:
         print(f"Could not download html for {ticker}", file=sys.stderr)
         return
 
-    with open(f"s1_html/{ticker}.html", "w") as f:
+    with open(destination_path, "w") as f:
         f.write(html_string)
 
 
