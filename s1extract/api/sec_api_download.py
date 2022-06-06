@@ -61,8 +61,7 @@ def download_s1_html(ticker: str) -> None:
 
 def main() -> None:
     tickers = get_tickers()
-    start_index = tickers.index("STVVY")
-    for ticker in tickers[start_index:]:
+    for ticker in tickers:
         download_s1_html(ticker)
 
 
