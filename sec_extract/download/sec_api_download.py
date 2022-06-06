@@ -91,8 +91,12 @@ def main() -> None:
         download_html(url_s1, f"s1_html/{firm.ticker_symbol}.html")
 
     for firm in firms:
+        if firm.year == "":
+            print(f"No year found for {firm}")
+            continue
+
         try:
-            url_10k = get_10k_url(firm.ticker_symbol, firm.year)
+            url_10k = get_10k_url(firm.ticker_symbol, int(firm.year) + 3)
         except FormNotFoundError as e:
             print(e, file=sys.stderr)
             continue
