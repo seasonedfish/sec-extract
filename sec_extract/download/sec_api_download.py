@@ -4,7 +4,7 @@ from pathlib import Path
 
 from sec_api import QueryApi, RenderApi
 
-from s1extract.keys import SEC_API_KEY
+from sec_extract.keys import SEC_API_KEY
 
 from requests.exceptions import ConnectionError
 
