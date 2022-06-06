@@ -20,11 +20,11 @@ def get_tickers() -> list[str]:
     return firms
 
 
-def get_s1_url(ticker: str) -> str:
+def get_url(ticker: str, form_type: str) -> str:
     query = {
         "query": {
             "query_string": {
-                "query": f"ticker:{ticker} AND formType:\"S-1\""
+                "query": f"ticker:{ticker} AND formType:\"{form_type}\""
             }
         },
         "from": "0",
@@ -35,16 +35,18 @@ def get_s1_url(ticker: str) -> str:
     try:
         return filings["filings"][0]["linkToFilingDetails"]
     except IndexError:
-        raise ValueError(f"No S-1 found for {ticker}")
+        raise ValueError(f"No {form_type} found for {ticker}")
 
 
-def download_s1_html(ticker: str) -> None:
-    destination_path = Path(f"s1_html/{ticker}.html")
+def download_html(ticker: str, form_type: str) -> None:
+    destination_path = Path(
+        f"{form_type.replace('-', '').lower()}_html/{ticker}.html"
+    )
     if destination_path.exists():
         return
 
     try:
-        url = get_s1_url(ticker)
+        url = get_url(ticker, form_type)
     except ValueError as e:
         print(e, file=sys.stderr)
         return
@@ -62,7 +64,7 @@ def download_s1_html(ticker: str) -> None:
 def main() -> None:
     tickers = get_tickers()
     for ticker in tickers:
-        download_s1_html(ticker)
+        download_html(ticker, "S-1")
 
 
 if __name__ == "__main__":
