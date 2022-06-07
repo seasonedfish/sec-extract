@@ -77,10 +77,10 @@ def download_html(url: str, destination_path: str) -> None:
 
     with open(destination_path, "w") as f:
         f.write(html_string)
+    logging.info(f"Downloaded {destination_path}")
 
 
-def main() -> None:
-    firms = get_firms()
+def download_all_s1s(firms: list[Firm]) -> None:
     for firm in firms:
         try:
             url_s1 = get_s1_url(firm.ticker_symbol)
@@ -89,6 +89,8 @@ def main() -> None:
             continue
         download_html(url_s1, f"s1_html/{firm.ticker_symbol}.html")
 
+
+def download_all_10ks(firms: list[Firm]) -> None:
     for firm in firms:
         if firm.year == "":
             logging.warning(f"No year found for {firm}")
@@ -102,6 +104,13 @@ def main() -> None:
                 logging.warning(e)
                 continue
             download_html(url_10k, f"10k_html/{firm.ticker_symbol}{document_year}.html")
+
+
+def main() -> None:
+    firms = get_firms()
+
+    download_all_s1s(firms)
+    download_all_10ks(firms)
 
 
 if __name__ == "__main__":
