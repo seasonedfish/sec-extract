@@ -95,12 +95,14 @@ def main() -> None:
             print(f"No year found for {firm}")
             continue
 
-        try:
-            url_10k = get_10k_url(firm.ticker_symbol, int(firm.year) + 3)
-        except FormNotFoundError as e:
-            print(e, file=sys.stderr)
-            continue
-        download_html(url_10k, f"10k_html/{firm.ticker_symbol}.html")
+        for i in range(3, 6):
+            document_year = int(firm.year) + i
+            try:
+                url_10k = get_10k_url(firm.ticker_symbol, document_year)
+            except FormNotFoundError as e:
+                print(e, file=sys.stderr)
+                continue
+            download_html(url_10k, f"10k_html/{firm.ticker_symbol}{document_year}.html")
 
 
 if __name__ == "__main__":
