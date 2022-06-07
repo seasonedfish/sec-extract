@@ -1,13 +1,12 @@
 import csv
-import sys
+import logging
 from collections import namedtuple
 from os import path
 
-from sec_api import QueryApi, RenderApi
-
-from sec_extract.keys import SEC_API_KEY
-
 from requests.exceptions import ConnectionError
+
+from sec_api import QueryApi, RenderApi
+from sec_extract.keys import SEC_API_KEY
 
 QUERY_API = QueryApi(SEC_API_KEY)
 RENDER_API = RenderApi(SEC_API_KEY)
@@ -73,7 +72,7 @@ def download_html(url: str, destination_path: str) -> None:
     try:
         html_string = RENDER_API.get_filing(url)
     except ConnectionError:
-        print(f"Could not download {url}", file=sys.stderr)
+        logging.warning(f"Could not download {url}")
         return
 
     with open(destination_path, "w") as f:
@@ -86,13 +85,13 @@ def main() -> None:
         try:
             url_s1 = get_s1_url(firm.ticker_symbol)
         except FormNotFoundError as e:
-            print(e, file=sys.stderr)
+            logging.warning(e)
             continue
         download_html(url_s1, f"s1_html/{firm.ticker_symbol}.html")
 
     for firm in firms:
         if firm.year == "":
-            print(f"No year found for {firm}")
+            logging.warning(f"No year found for {firm}")
             continue
 
         for i in range(3, 6):
@@ -100,7 +99,7 @@ def main() -> None:
             try:
                 url_10k = get_10k_url(firm.ticker_symbol, document_year)
             except FormNotFoundError as e:
-                print(e, file=sys.stderr)
+                logging.warning(e)
                 continue
             download_html(url_10k, f"10k_html/{firm.ticker_symbol}{document_year}.html")
 
