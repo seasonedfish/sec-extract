@@ -36,7 +36,7 @@ def get_s1_url(ticker: str) -> str:
         },
         "from": "0",
         "size": "1",
-        "sort": [{"filedAt": {"order": "desc"}}]
+        "sort": [{"filedAt": {"order": "asc"}}]
     }
     filings = QUERY_API.get_filings(query)
     try:
