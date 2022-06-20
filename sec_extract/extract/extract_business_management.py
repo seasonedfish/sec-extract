@@ -8,7 +8,11 @@ def extract_sections(soup: BeautifulSoup) -> str:
 def get_anchor_names(soup: BeautifulSoup, section_name: str) -> (str, str):
     start_anchor = soup.find("a", text=section_name)
     end_anchor = start_anchor.find_next("a")
-    return start_anchor.attrs["href"][1:], end_anchor.attrs["href"][1:]
+
+    start_anchor_name = start_anchor.attrs["href"].replace("#", "")
+    end_anchor_name = end_anchor.attrs["href"].replace("#", "")
+
+    return start_anchor_name, end_anchor_name
 
 
 def extract_between_tags(soup: BeautifulSoup, start_tag, end_tag) -> str:
