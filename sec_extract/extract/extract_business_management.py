@@ -2,7 +2,13 @@ from bs4 import BeautifulSoup
 
 
 def extract_sections(soup: BeautifulSoup) -> str:
-    return extract_business_section(soup) + extract_management_section(soup)
+    return extract_section(soup, "BUSINESS") + extract_section(soup, "MANAGEMENT")
+
+
+def get_anchor_names(soup: BeautifulSoup, section_name: str) -> (str, str):
+    start_anchor = soup.find("a", text=section_name)
+    end_anchor = start_anchor.find_next("a")
+    return start_anchor.attrs["href"][1:], end_anchor.attrs["href"][1:]
 
 
 def extract_between_tags(soup: BeautifulSoup, start_tag, end_tag) -> str:
@@ -12,16 +18,11 @@ def extract_between_tags(soup: BeautifulSoup, start_tag, end_tag) -> str:
     return soup_string[start_index: end_index]
 
 
-def extract_business_section(soup: BeautifulSoup) -> str:
-    start_anchor = soup.find("a", attrs={"name": "tx319036_10"})
-    end_anchor = soup.find("a", attrs={"name": "tx319036_11"})
+def extract_section(soup: BeautifulSoup, section_name: str) -> str:
+    start_anchor_name, end_anchor_name = get_anchor_names(soup, section_name)
 
-    return extract_between_tags(soup, start_anchor, end_anchor)
-
-
-def extract_management_section(soup: BeautifulSoup) -> str:
-    start_anchor = soup.find("a", attrs={"name": "tx319036_11"})
-    end_anchor = soup.find("a", attrs={"name": "tx319036_12"})
+    start_anchor = soup.find("a", attrs={"name": start_anchor_name})
+    end_anchor = soup.find("a", attrs={"name": end_anchor_name})
 
     return extract_between_tags(soup, start_anchor, end_anchor)
 
