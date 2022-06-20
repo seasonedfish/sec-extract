@@ -1,16 +1,22 @@
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
 
-with open("/Users/fisher/PycharmProjects/sec-extract/sec_extract/download/s1_html/GMED.html") as f:
-    soup = BeautifulSoup(f, "html.parser")
 
-business_anchor = soup.find("a", attrs={"name": "tx319036_10"})
+def main():
+    with open("/Users/fisher/PycharmProjects/sec-extract/sec_extract/download/s1_html/GMED.html") as f:
+        soup = BeautifulSoup(f, "html.parser")
 
-business_section = []
-for element in business_anchor.next_elements:
-    if element.name == "a" and ("name", "tx319036_11") in element.attrs.items():
-        break
-    else:
-        business_section.append(str(element))
+    business_anchor = soup.find("a", attrs={"name": "tx319036_10"})
+    management_end_anchor = soup.find("a", attrs={"name": "tx319036_12"})
 
-with open("/Users/fisher/PycharmProjects/sec-extract/sec_extract/extract/s1/GMED.html", "w") as f:
-    f.writelines(business_section)
+    soup_text = str(soup)
+    start_index = soup_text.index(str(business_anchor))
+    stop_index = soup_text.index(str(management_end_anchor))
+
+    result = soup_text[start_index: stop_index]
+
+    with open("/Users/fisher/PycharmProjects/sec-extract/sec_extract/extract/s1/GMED.html", "w") as f:
+        f.write(result)
+
+
+if __name__ == "__main__":
+    main()
