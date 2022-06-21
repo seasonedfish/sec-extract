@@ -1,6 +1,20 @@
 from bs4 import BeautifulSoup
 import functools
 
+BEFORE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+"""
+
+AFTER = """</body>
+</html>
+"""
+
 
 def extract_sections(soup: BeautifulSoup) -> str:
     return extract_section(soup, "business") + extract_section(soup, "management")
@@ -55,9 +69,14 @@ def main():
     management = extract_section(soup, "management")
 
     with open(f"/Users/fisher/PycharmProjects/sec-extract/sec_extract/extract/s1_business/{ticker}.html", "w") as f:
+        f.write(BEFORE)
         f.write(business)
+        f.write(AFTER)
+
     with open(f"/Users/fisher/PycharmProjects/sec-extract/sec_extract/extract/s1_management/{ticker}.html", "w") as f:
+        f.write(BEFORE)
         f.write(management)
+        f.write(AFTER)
 
 
 if __name__ == "__main__":
