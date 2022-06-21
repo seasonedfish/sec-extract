@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import functools
 
 BEFORE = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -47,13 +47,24 @@ def extract_between_tags(soup: BeautifulSoup, start_tag, end_tag) -> str:
     return soup_string[start_index: end_index]
 
 
+def get_parent_when_no_siblings(tag) -> Tag:
+    if any(isinstance(sibling, Tag) for sibling in tag.next_siblings):
+        return tag
+    else:
+        return get_parent_when_no_siblings(tag.parent)
+
+
 def extract_section(soup: BeautifulSoup, section_name: str) -> str:
     start_anchor_name, end_anchor_name = get_anchor_names(soup, section_name)
 
     start_anchor = soup.find("a", attrs={"name": start_anchor_name})
     end_anchor = soup.find("a", attrs={"name": end_anchor_name})
 
-    return extract_between_tags(soup, start_anchor, end_anchor)
+    return extract_between_tags(
+        soup,
+        get_parent_when_no_siblings(start_anchor),
+        get_parent_when_no_siblings(end_anchor)
+    )
 
 
 def main():
