@@ -1,6 +1,0 @@
-open file
-
-keep looping through pages until link to table of contents found
-then go to link
-
-get page numbers
