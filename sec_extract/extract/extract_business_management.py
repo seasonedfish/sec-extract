@@ -16,10 +16,6 @@ AFTER = """</body>
 """
 
 
-def extract_sections(soup: BeautifulSoup) -> str:
-    return extract_section(soup, "business") + extract_section(soup, "management")
-
-
 def is_start_anchor_for_section(tag, section_name: str) -> bool:
     return tag.name.lower() == "a" and tag.text.lower() == section_name
 
