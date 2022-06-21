@@ -69,18 +69,18 @@ def extract_section(soup: BeautifulSoup, section_name: str) -> str:
 
 def main():
     ticker = "MULE"
-    with open(f"/Users/fisher/PycharmProjects/sec-extract/sec_extract/download/s1_html/{ticker}.html") as f:
+    with open(f"../download/s1_html/{ticker}.html") as f:
         soup = BeautifulSoup(f, "html.parser")
 
     business = extract_section(soup, "business")
     management = extract_section(soup, "management")
 
-    with open(f"/Users/fisher/PycharmProjects/sec-extract/sec_extract/extract/s1_business/{ticker}.html", "w") as f:
+    with open(f"s1_business/{ticker}.html", "w") as f:
         f.write(BEFORE)
         f.write(business)
         f.write(AFTER)
 
-    with open(f"/Users/fisher/PycharmProjects/sec-extract/sec_extract/extract/s1_management/{ticker}.html", "w") as f:
+    with open(f"s1_management/{ticker}.html", "w") as f:
         f.write(BEFORE)
         f.write(management)
         f.write(AFTER)
