@@ -26,6 +26,15 @@ class SectionAnchorNotFoundError(Exception):
         return f"\"{self.section_name}\" section anchor not found"
 
 
+class MissingNamedAnchorError(Exception):
+    def __init__(self, section_name: str):
+        super().__init__(section_name)
+        self.section_name = section_name
+
+    def __str__(self):
+        return f"Missing named anchor for \"{self.section_name}\""
+
+
 def is_start_anchor_for_section(tag, section_name: str) -> bool:
     return tag.name.lower() == "a" and tag.text.lower() == section_name
 
@@ -72,6 +81,9 @@ def extract_section(soup: BeautifulSoup, section_name: str) -> str:
 
     start_anchor = soup.find("a", attrs={"name": start_anchor_name})
     end_anchor = soup.find("a", attrs={"name": end_anchor_name})
+
+    if start_anchor is None or end_anchor is None:
+        raise MissingNamedAnchorError(section_name)
 
     return extract_between_tags(
         soup,
@@ -127,6 +139,8 @@ def main():
         except SectionAnchorNotFoundError as e:
             logging.warning(f"\"{e.section_name}\" section anchor not found for {ticker}")
             continue
+        except MissingNamedAnchorError as e:
+            logging.warning(f"Missing named anchor for \"{e.section_name}\" for {ticker}")
 
 
 if __name__ == "__main__":
