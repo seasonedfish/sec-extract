@@ -1,13 +1,28 @@
 from bs4 import BeautifulSoup
+import functools
 
 
 def extract_sections(soup: BeautifulSoup) -> str:
-    return extract_section(soup, "BUSINESS") + extract_section(soup, "MANAGEMENT")
+    return extract_section(soup, "business") + extract_section(soup, "management")
+
+
+def is_start_anchor_for_section(tag, section_name: str) -> bool:
+    return tag.name.lower() == "a" and tag.text.lower() == section_name
+
+
+def is_start_anchor(tag) -> bool:
+    return (
+        tag.name.lower() == "a"
+        and tag.text != ""
+        and not tag.text.isdigit()
+    )
 
 
 def get_anchor_names(soup: BeautifulSoup, section_name: str) -> (str, str):
-    start_anchor = soup.find("a", text=section_name)
-    end_anchor = start_anchor.find_next("a")
+    start_anchor = soup.find(
+        functools.partial(is_start_anchor_for_section, section_name=section_name)
+    )
+    end_anchor = start_anchor.find_next(is_start_anchor)
 
     start_anchor_name = start_anchor.attrs["href"].replace("#", "")
     end_anchor_name = end_anchor.attrs["href"].replace("#", "")
