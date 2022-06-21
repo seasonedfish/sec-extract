@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup, Tag
 import functools
+import logging
 
 BEFORE = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
@@ -16,6 +17,15 @@ AFTER = """</body>
 """
 
 
+class SectionAnchorNotFoundError(Exception):
+    def __init__(self, section_name: str):
+        super().__init__(section_name)
+        self.section_name = section_name
+
+    def __str__(self):
+        return f"\"{self.section_name}\" section anchor not found"
+
+
 def is_start_anchor_for_section(tag, section_name: str) -> bool:
     return tag.name.lower() == "a" and tag.text.lower() == section_name
 
@@ -29,10 +39,13 @@ def is_start_anchor(tag) -> bool:
 
 
 def get_anchor_names(soup: BeautifulSoup, section_name: str) -> (str, str):
-    start_anchor = soup.find(
-        functools.partial(is_start_anchor_for_section, section_name=section_name)
-    )
-    end_anchor = start_anchor.find_next(is_start_anchor)
+    try:
+        start_anchor = soup.find(
+            functools.partial(is_start_anchor_for_section, section_name=section_name)
+        )
+        end_anchor = start_anchor.find_next(is_start_anchor)
+    except AttributeError:
+        raise SectionAnchorNotFoundError(section_name)
 
     start_anchor_name = start_anchor.attrs["href"].replace("#", "")
     end_anchor_name = end_anchor.attrs["href"].replace("#", "")
@@ -86,7 +99,34 @@ def extract_business_management_to_files(ticker: str) -> None:
 
 
 def main():
-    extract_business_management_to_files("MULE")
+    tickers = [
+        "VIAC",
+        "INWK",
+        "GMED",
+        "CLIR",
+        "GLUU",
+        "MULE",
+        "BCC",
+        "FIVN",
+        "CMG",
+        "WIFI",
+        "NTLA",
+        "KBR",
+        "FMSA",
+        "EGLT",
+        "VAPO",
+        "MRC",
+        "VISN",
+        "SMOD",
+        "N",
+        "LRE"
+    ]
+    for ticker in tickers:
+        try:
+            extract_business_management_to_files(ticker)
+        except SectionAnchorNotFoundError as e:
+            logging.warning(f"\"{e.section_name}\" section anchor not found for {ticker}")
+            continue
 
 
 if __name__ == "__main__":
