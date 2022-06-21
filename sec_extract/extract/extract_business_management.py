@@ -47,13 +47,17 @@ def extract_section(soup: BeautifulSoup, section_name: str) -> str:
 
 
 def main():
-    with open("/Users/fisher/PycharmProjects/sec-extract/sec_extract/download/s1_html/GMED.html") as f:
+    ticker = "MULE"
+    with open(f"/Users/fisher/PycharmProjects/sec-extract/sec_extract/download/s1_html/{ticker}.html") as f:
         soup = BeautifulSoup(f, "html.parser")
 
-    result = extract_sections(soup)
+    business = extract_section(soup, "business")
+    management = extract_section(soup, "management")
 
-    with open("/Users/fisher/PycharmProjects/sec-extract/sec_extract/extract/s1/GMED.html", "w") as f:
-        f.write(result)
+    with open(f"/Users/fisher/PycharmProjects/sec-extract/sec_extract/extract/s1_business/{ticker}.html", "w") as f:
+        f.write(business)
+    with open(f"/Users/fisher/PycharmProjects/sec-extract/sec_extract/extract/s1_management/{ticker}.html", "w") as f:
+        f.write(management)
 
 
 if __name__ == "__main__":
