@@ -67,8 +67,7 @@ def extract_section(soup: BeautifulSoup, section_name: str) -> str:
     )
 
 
-def main():
-    ticker = "MULE"
+def extract_business_management_to_files(ticker: str) -> None:
     with open(f"../download/s1_html/{ticker}.html") as f:
         soup = BeautifulSoup(f, "html.parser")
 
@@ -84,6 +83,10 @@ def main():
         f.write(BEFORE)
         f.write(management)
         f.write(AFTER)
+
+
+def main():
+    extract_business_management_to_files("MULE")
 
 
 if __name__ == "__main__":
