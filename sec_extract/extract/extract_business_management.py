@@ -47,11 +47,11 @@ def extract_between_tags(soup: BeautifulSoup, start_tag, end_tag) -> str:
     return soup_string[start_index: end_index]
 
 
-def get_parent_when_no_siblings(tag) -> Tag:
+def find_parent_with_siblings(tag) -> Tag:
     if any(isinstance(sibling, Tag) for sibling in tag.next_siblings):
         return tag
     else:
-        return get_parent_when_no_siblings(tag.parent)
+        return find_parent_with_siblings(tag.parent)
 
 
 def extract_section(soup: BeautifulSoup, section_name: str) -> str:
@@ -62,8 +62,8 @@ def extract_section(soup: BeautifulSoup, section_name: str) -> str:
 
     return extract_between_tags(
         soup,
-        get_parent_when_no_siblings(start_anchor),
-        get_parent_when_no_siblings(end_anchor)
+        find_parent_with_siblings(start_anchor),
+        find_parent_with_siblings(end_anchor)
     )
 
 
