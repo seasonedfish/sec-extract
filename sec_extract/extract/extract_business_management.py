@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup, Tag
 import functools
 import logging
+import sys
 
 BEFORE = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
@@ -121,9 +122,6 @@ def extract_business_management_to_files(ticker: str) -> None:
 
 def main():
     tickers = [
-        "INWK",
-        "GMED",
-        "CLIR",
         "GLUU",
         "MULE",
         "BCC",
@@ -142,6 +140,7 @@ def main():
         "LRE"
     ]
     logging.basicConfig(level="DEBUG")
+    sys.setrecursionlimit(10000)  # Required to cast soup objects to strings
     for ticker in tickers:
         try:
             logging.info(f"Now extracting {ticker}")
