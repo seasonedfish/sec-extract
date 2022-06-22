@@ -105,22 +105,21 @@ def extract_section(soup: BeautifulSoup, section_name: str) -> str:
     )
 
 
-def extract_business_management_to_files(ticker: str) -> None:
-    with open(f"../download/s1_html/{ticker}.html") as f:
-        soup = BeautifulSoup(f, "html.parser")
+def extract_section_and_save(soup: BeautifulSoup, ticker: str, section_name: str) -> bool:
+    try:
+        section = extract_section(soup, section_name)
+    except SectionAnchorNotFoundError as e:
+        logging.warning(f"\"{e.section_name}\" section anchor not found for {ticker}")
+        return False
+    except MissingNamedAnchorError as e:
+        logging.warning(f"Missing named anchor for \"{e.section_name}\" for {ticker}")
+        return False
 
-    business = extract_section(soup, "business")
-    management = extract_section(soup, "management")
-
-    with open(f"s1_business/{ticker}.html", "w") as f:
+    with open(f"s1_{section_name}/{ticker}.html", "w") as f:
         f.write(BEFORE)
-        f.write(business)
+        f.write(section)
         f.write(AFTER)
-
-    with open(f"s1_management/{ticker}.html", "w") as f:
-        f.write(BEFORE)
-        f.write(management)
-        f.write(AFTER)
+    return True
 
 
 def main():
@@ -143,14 +142,12 @@ def main():
     logging.basicConfig(level="DEBUG")
     sys.setrecursionlimit(10000)  # Required to cast soup objects to strings
     for ticker in tickers:
-        try:
-            logging.info(f"Now extracting {ticker}")
-            extract_business_management_to_files(ticker)
-        except SectionAnchorNotFoundError as e:
-            logging.warning(f"\"{e.section_name}\" section anchor not found for {ticker}")
-            continue
-        except MissingNamedAnchorError as e:
-            logging.warning(f"Missing named anchor for \"{e.section_name}\" for {ticker}")
+        logging.info(f"Now extracting {ticker}")
+        with open(f"../download/s1_html/{ticker}.html") as f:
+            soup = BeautifulSoup(f, "html.parser")
+
+        extract_section_and_save(soup, ticker, "business")
+        extract_section_and_save(soup, ticker, "management")
 
 
 if __name__ == "__main__":
