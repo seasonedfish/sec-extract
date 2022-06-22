@@ -40,7 +40,10 @@ def is_start_anchor_for_section(tag, section_name: str) -> bool:
     try:
         return (
             tag.name == "a"
-            and tag.text.lower() == section_name
+            and (
+                tag.text.lower() == section_name
+                or any(d.text.lower() == section_name for d in tag.descendants)
+            )
         )
     except AttributeError:
         return False
@@ -122,8 +125,6 @@ def extract_business_management_to_files(ticker: str) -> None:
 
 def main():
     tickers = [
-        "GLUU",
-        "MULE",
         "BCC",
         "FIVN",
         "CMG",
