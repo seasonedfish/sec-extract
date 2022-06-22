@@ -36,15 +36,24 @@ class MissingNamedAnchorError(Exception):
 
 
 def is_start_anchor_for_section(tag, section_name: str) -> bool:
-    return tag.name.lower() == "a" and tag.text.lower() == section_name
+    try:
+        return (
+            tag.name == "a"
+            and tag.text.lower() == section_name
+        )
+    except AttributeError:
+        return False
 
 
 def is_start_anchor(tag) -> bool:
-    return (
-        tag.name.lower() == "a"
-        and tag.text != ""
-        and not tag.text.isdigit()
-    )
+    try:
+        return (
+            tag.name == "a"
+            and tag.text != ""
+            and not tag.text.isdigit()
+        )
+    except AttributeError:
+        return False
 
 
 def get_anchor_names(soup: BeautifulSoup, section_name: str) -> (str, str):
@@ -112,7 +121,6 @@ def extract_business_management_to_files(ticker: str) -> None:
 
 def main():
     tickers = [
-        "VIAC",
         "INWK",
         "GMED",
         "CLIR",
@@ -133,8 +141,10 @@ def main():
         "N",
         "LRE"
     ]
+    logging.basicConfig(level="DEBUG")
     for ticker in tickers:
         try:
+            logging.info(f"Now extracting {ticker}")
             extract_business_management_to_files(ticker)
         except SectionAnchorNotFoundError as e:
             logging.warning(f"\"{e.section_name}\" section anchor not found for {ticker}")
