@@ -44,15 +44,14 @@ class IncompatibleTableOfContentsError(Exception):
 
 def is_start_anchor_for_section(tag, possible_section_names: list[str]) -> bool:
     try:
-        return (
-            tag.name == "a"
-            and "href" in tag.attrs
-            and any(
-                # Regex removes duplicate whitespace
-                # https://stackoverflow.com/a/1981366
-                re.sub(r"\s\s+", " ", tag.text.lower().strip()) == s
-                for s in possible_section_names
-            )
+        if not (tag.name == "a" and "href" in tag.attrs):
+            return False
+
+        return any(
+            # Regex removes duplicate whitespace
+            # https://stackoverflow.com/a/1981366
+            re.sub(r"\s\s+", " ", tag.text.lower().strip()) == s
+            for s in possible_section_names
         )
     except AttributeError:
         return False
