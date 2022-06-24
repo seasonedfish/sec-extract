@@ -18,13 +18,13 @@ AFTER = """</body>
 """
 
 
-class SectionAnchorNotFoundError(Exception):
-    def __init__(self, section_name: str):
-        super().__init__(section_name)
-        self.section_name = section_name
+class NoLinksFoundForAnySectionNameError(Exception):
+    def __init__(self, section_names: list[str]):
+        super().__init__(section_names)
+        self.section_names = section_names
 
     def __str__(self):
-        return f"\"{self.section_name}\" section anchor not found"
+        return f"No links found for any section name in {self.section_names}"
 
 
 class MissingNamedAnchorError(Exception):
@@ -40,12 +40,12 @@ class IncompatibleTableOfContentsError(Exception):
     pass
 
 
-def is_start_anchor_for_section(tag, section_name: str) -> bool:
+def is_start_anchor_for_section(tag, possible_section_names: list[str]) -> bool:
     try:
         return (
             tag.name == "a"
             and (
-                tag.text.lower().strip() == section_name
+                any(tag.text.lower().strip().replace == s for s in possible_section_names)
             )
         )
     except AttributeError:
@@ -63,16 +63,16 @@ def is_start_anchor_for_different_section(tag, old_href) -> bool:
         return False
 
 
-def get_anchor_names(soup: BeautifulSoup, section_name: str) -> (str, str):
+def get_anchor_names(soup: BeautifulSoup, possible_section_names: list[str]) -> (str, str):
     try:
         start_anchor = soup.find(
-            functools.partial(is_start_anchor_for_section, section_name=section_name)
+            functools.partial(is_start_anchor_for_section, possible_section_names=possible_section_names)
         )
         end_anchor = start_anchor.find_next(
             functools.partial(is_start_anchor_for_different_section, old_href=start_anchor.attrs["href"])
         )
     except AttributeError:
-        raise SectionAnchorNotFoundError(section_name)
+        raise NoLinksFoundForAnySectionNameError(possible_section_names)
 
     start_anchor_name = start_anchor.attrs["href"].replace("#", "")
     end_anchor_name = end_anchor.attrs["href"].replace("#", "")
@@ -94,14 +94,16 @@ def find_parent_with_siblings(tag) -> Tag:
         return find_parent_with_siblings(tag.parent)
 
 
-def extract_section(soup: BeautifulSoup, section_name: str) -> str:
-    start_anchor_name, end_anchor_name = get_anchor_names(soup, section_name)
+def extract_section(soup: BeautifulSoup, possible_section_names: list[str]) -> str:
+    start_anchor_name, end_anchor_name = get_anchor_names(soup, possible_section_names)
 
     start_anchor = soup.find("a", attrs={"name": start_anchor_name})
     end_anchor = soup.find("a", attrs={"name": end_anchor_name})
 
-    if start_anchor is None or end_anchor is None:
-        raise MissingNamedAnchorError(section_name)
+    if start_anchor is None:
+        raise MissingNamedAnchorError(start_anchor_name)
+    if end_anchor is None:
+        raise MissingNamedAnchorError(end_anchor_name)
 
     return extract_between_tags(
         soup,
@@ -110,11 +112,11 @@ def extract_section(soup: BeautifulSoup, section_name: str) -> str:
     )
 
 
-def extract_section_and_save(soup: BeautifulSoup, ticker: str, section_name: str) -> bool:
+def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_names: list[str]) -> bool:
     try:
-        section = extract_section(soup, section_name)
-    except SectionAnchorNotFoundError as e:
-        logging.warning(f"\"{e.section_name}\" section anchor not found for {ticker}")
+        section = extract_section(soup, possible_section_names)
+    except NoLinksFoundForAnySectionNameError as e:
+        logging.warning(f"{e} for {ticker}")
         return False
     except MissingNamedAnchorError as e:
         logging.warning(f"Missing named anchor for \"{e.section_name}\" for {ticker}")
@@ -123,7 +125,7 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, section_name: str
         logging.warning(f"Incompatible table of contents for {ticker}")
         return False
 
-    with open(f"s1_{section_name}/{ticker}.html", "w") as f:
+    with open(f"s1_{possible_section_names[0]}/{ticker}.html", "w") as f:
         f.write(BEFORE)
         f.write(section)
         f.write(AFTER)
@@ -132,20 +134,7 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, section_name: str
 
 def main():
     tickers = [
-        "BCC",
-        "FIVN",
-        "CMG",
-        "WIFI",
-        "NTLA",
-        "KBR",
-        "FMSA",
-        "EGLT",
-        "VAPO",
-        "MRC",
-        "VISN",
-        "SMOD",
-        "N",
-        "LRE"
+        "IL", "VIT", "AMPH", "JCG", "LNKD", "PHAS", "TNET", "SCPH", "AATI", "CCIX"
     ]
     logging.basicConfig(level="DEBUG")
     sys.setrecursionlimit(10000)  # Required to cast soup objects to strings
@@ -154,8 +143,8 @@ def main():
         with open(f"../download/s1_html/{ticker}.html") as f:
             soup = BeautifulSoup(f, "html.parser")
 
-        extract_section_and_save(soup, ticker, "business")
-        extract_section_and_save(soup, ticker, "management")
+        extract_section_and_save(soup, ticker, ["business", "what we do", "proposed business"])
+        extract_section_and_save(soup, ticker, ["management"])
 
 
 if __name__ == "__main__":
