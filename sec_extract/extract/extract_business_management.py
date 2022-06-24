@@ -36,6 +36,10 @@ class MissingNamedAnchorError(Exception):
         return f"Missing named anchor for \"{self.section_name}\""
 
 
+class IncompatibleTableOfContentsError(Exception):
+    pass
+
+
 def is_start_anchor_for_section(tag, section_name: str) -> bool:
     try:
         return (
@@ -49,13 +53,13 @@ def is_start_anchor_for_section(tag, section_name: str) -> bool:
         return False
 
 
-def is_start_anchor(tag) -> bool:
+def is_start_anchor_for_different_section(tag, old_href) -> bool:
     try:
-        return (
-            tag.name == "a"
-            and tag.text != ""
-            and not tag.text.isdigit()
-        )
+        if tag.name == "a" and tag.text != "" and not tag.text.isdigit():
+            if ("href", old_href) in tag.attrs.items():
+                raise IncompatibleTableOfContentsError
+
+            return True
     except AttributeError:
         return False
 
@@ -65,7 +69,9 @@ def get_anchor_names(soup: BeautifulSoup, section_name: str) -> (str, str):
         start_anchor = soup.find(
             functools.partial(is_start_anchor_for_section, section_name=section_name)
         )
-        end_anchor = start_anchor.find_next(is_start_anchor)
+        end_anchor = start_anchor.find_next(
+            functools.partial(is_start_anchor_for_different_section, old_href=start_anchor.attrs["href"])
+        )
     except AttributeError:
         raise SectionAnchorNotFoundError(section_name)
 
@@ -113,6 +119,9 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, section_name: str
         return False
     except MissingNamedAnchorError as e:
         logging.warning(f"Missing named anchor for \"{e.section_name}\" for {ticker}")
+        return False
+    except IncompatibleTableOfContentsError:
+        logging.warning(f"Incompatible table of contents for {ticker}")
         return False
 
     with open(f"s1_{section_name}/{ticker}.html", "w") as f:
