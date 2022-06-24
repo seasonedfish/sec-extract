@@ -46,6 +46,7 @@ def is_start_anchor_for_section(tag, possible_section_names: list[str]) -> bool:
     try:
         return (
             tag.name == "a"
+            and "href" in tag.attrs
             and any(
                 # Regex removes duplicate whitespace
                 # https://stackoverflow.com/a/1981366
@@ -139,7 +140,7 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_
 
 def main():
     tickers = [
-        "IL", "VIT", "AMPH", "JCG", "LNKD", "PHAS", "TNET", "SCPH", "AATI", "CCIX"
+        "DBTK", "SUN", "KRYS", "QMAR", "PLSE", "PFPT", "TRVN", "CIVI", "TXTR", "HUBS"
     ]
     logging.basicConfig(level="DEBUG")
     sys.setrecursionlimit(10000)  # Required to cast soup objects to strings
