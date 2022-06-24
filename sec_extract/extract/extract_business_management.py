@@ -60,11 +60,21 @@ def is_start_anchor_for_section(tag, possible_section_names: list[str]) -> bool:
 
 def is_start_anchor_for_different_section(tag, old_href) -> bool:
     try:
-        if tag.name == "a" and tag.text != "" and not tag.text.isdigit():
-            if ("href", old_href) in tag.attrs.items():
-                raise IncompatibleTableOfContentsError
+        if not (tag.name == "a" and "href" in tag.attrs):
+            # Checks that it's a link
+            return False
 
-            return True
+        if not (tag.text != "" and not tag.text.isdigit()):
+            # Checks that it's not a page number or other invalid link
+            return False
+
+        if ("href", old_href) in tag.attrs.items():
+            # Link points to the same place as old link.
+            # This means that it's a table of contents with subsections,
+            # which is unsupported.
+            raise IncompatibleTableOfContentsError
+
+        return True
     except AttributeError:
         return False
 
