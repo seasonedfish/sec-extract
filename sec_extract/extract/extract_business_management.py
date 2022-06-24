@@ -148,7 +148,7 @@ def main():
         with open(f"../download/s1_html/{ticker}.html") as f:
             soup = BeautifulSoup(f, "html.parser")
 
-        extract_section_and_save(soup, ticker, ["business", "what we do", "proposed business"])
+        extract_section_and_save(soup, ticker, ["business", "what we do", "proposed business", "our business"])
         extract_section_and_save(soup, ticker, ["management"])
 
 
