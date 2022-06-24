@@ -45,8 +45,7 @@ def is_start_anchor_for_section(tag, section_name: str) -> bool:
         return (
             tag.name == "a"
             and (
-                tag.text.lower() == section_name
-                or any(d.text.lower() == section_name for d in tag.descendants)
+                tag.text.lower().strip() == section_name
             )
         )
     except AttributeError:
