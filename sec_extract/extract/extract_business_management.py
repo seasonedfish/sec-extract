@@ -124,7 +124,7 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_
         logging.warning(f"{e} for {ticker}")
         return False
     except MissingNamedAnchorError as e:
-        logging.warning(f"Missing named anchor for \"{e.section_name}\" for {ticker}")
+        logging.warning(f"{e} for {ticker}")
         return False
     except IncompatibleTableOfContentsError:
         logging.warning(f"Incompatible table of contents for {ticker}")
