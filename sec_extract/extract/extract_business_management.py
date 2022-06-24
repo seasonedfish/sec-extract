@@ -1,3 +1,5 @@
+import re
+
 from bs4 import BeautifulSoup, Tag
 import functools
 import logging
@@ -44,8 +46,11 @@ def is_start_anchor_for_section(tag, possible_section_names: list[str]) -> bool:
     try:
         return (
             tag.name == "a"
-            and (
-                any(tag.text.lower().strip().replace == s for s in possible_section_names)
+            and any(
+                # Regex removes duplicate whitespace
+                # https://stackoverflow.com/a/1981366
+                re.sub(r"\s\s+", " ", tag.text.lower().strip()) == s
+                for s in possible_section_names
             )
         )
     except AttributeError:
