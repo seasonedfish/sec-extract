@@ -28,7 +28,7 @@ class NoLinksFoundForAnySectionNameError(Exception):
         self.section_names = section_names
 
     def __str__(self):
-        return f"No links found for any section name in {self.section_names}"
+        return f"No links found for any section name in ['{self.section_names[0]}', ...]"
 
 
 class MissingNamedAnchorError(Exception):
