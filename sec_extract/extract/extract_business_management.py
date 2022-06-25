@@ -19,7 +19,7 @@ AFTER = """</body>
 </html>
 """
 
-SECTION_LENGTH_THRESHOLD_CHARACTERS = 200
+SECTION_LENGTH_THRESHOLD_CHARACTERS = 5000
 
 
 class NoLinksFoundForAnySectionNameError(Exception):
