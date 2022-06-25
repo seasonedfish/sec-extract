@@ -1,6 +1,5 @@
-import csv
+from pathlib import Path
 import re
-from os import path
 
 from bs4 import BeautifulSoup, Tag
 import functools
@@ -163,19 +162,19 @@ def extract_section(soup: BeautifulSoup, possible_section_names: list[str]) -> s
     return section_html
 
 
-def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_names: list[str]) -> bool:
-    destination_path = f"s1_{possible_section_names[0]}/{ticker}.html"
-    if path.exists(destination_path):
+def extract_section_and_save(soup: BeautifulSoup, basename: str, possible_section_names: list[str]) -> bool:
+    destination_path = f"s1_{possible_section_names[0]}/{basename}"
+    if Path(destination_path).exists():
         logging.info(f"{destination_path} already exists, skipped")
         return False
 
     try:
         section = extract_section(soup, possible_section_names)
     except (NoLinksFoundForAnySectionNameError, MissingNamedAnchorError, IncompatibleTableOfContentsError) as e:
-        logging.warning(f"{e} for {ticker}, skipped")
+        logging.warning(f"{e} for {basename}, skipped")
         return False
     except SectionTextTooShortError as e:
-        logging.warning(f"Parsing \"{e.anchor_name}\" likely failed for {ticker}, skipped")
+        logging.warning(f"Parsing \"{e.anchor_name}\" likely failed for {basename}, skipped")
         return False
 
     with open(destination_path, "w") as f:
@@ -186,20 +185,17 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_
 
 
 def main():
-    logging.basicConfig(level="DEBUG")
     sys.setrecursionlimit(10000)  # Required to cast soup objects to strings
 
-    tickers = [
-        "DBTK", "SUN", "KRYS", "QMAR", "PLSE", "PFPT", "TRVN", "CIVI", "TXTR", "HUBS"
-    ]
+    paths = Path("../download/s1_html/").glob("*.html")
 
-    for ticker in tickers:
-        logging.info(f"Now extracting {ticker}")
-        with open(f"../download/s1_html/{ticker}.html") as f:
+    for path in paths:
+        logging.info(f"Now extracting {path}")
+        with open(path) as f:
             soup = BeautifulSoup(f, "html.parser")
 
-        extract_section_and_save(soup, ticker, ["business", "what we do", "proposed business", "our business"])
-        extract_section_and_save(soup, ticker, ["management", "management and board of directors"])
+        extract_section_and_save(soup, path.name, ["business", "what we do", "proposed business", "our business"])
+        extract_section_and_save(soup, path.name, ["management", "management and board of directors"])
 
 
 if __name__ == "__main__":
