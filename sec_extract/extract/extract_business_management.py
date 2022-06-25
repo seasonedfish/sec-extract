@@ -19,6 +19,8 @@ AFTER = """</body>
 </html>
 """
 
+SECTION_LENGTH_THRESHOLD_CHARACTERS = 200
+
 
 class NoLinksFoundForAnySectionNameError(Exception):
     def __init__(self, section_names: list[str]):
@@ -40,6 +42,16 @@ class MissingNamedAnchorError(Exception):
 
 class IncompatibleTableOfContentsError(Exception):
     pass
+
+
+class SectionTextTooShortError(Exception):
+    def __init__(self, anchor_name: str, threshold_characters: int):
+        super().__init__(anchor_name, threshold_characters)
+        self.anchor_name = anchor_name
+        self.threshold_characters = threshold_characters
+
+    def __str__(self):
+        return f"Text of section \"{self.anchor_name}\" less than {self.threshold_characters} characters"
 
 
 def normalize_string(s: str) -> str:
@@ -133,11 +145,19 @@ def extract_section(soup: BeautifulSoup, possible_section_names: list[str]) -> s
     if end_anchor is None:
         raise MissingNamedAnchorError(end_anchor_name)
 
-    return extract_between_tags(
+    section_html = extract_between_tags(
         soup,
         find_parent_with_siblings(start_anchor),
         find_parent_with_siblings(end_anchor)
     )
+
+    if len(section_html) < SECTION_LENGTH_THRESHOLD_CHARACTERS:
+        raise SectionTextTooShortError(
+            start_anchor.attrs["name"],
+            SECTION_LENGTH_THRESHOLD_CHARACTERS
+        )
+
+    return section_html
 
 
 def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_names: list[str]) -> bool:
@@ -151,6 +171,9 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_
         return False
     except IncompatibleTableOfContentsError:
         logging.warning(f"Incompatible table of contents for {ticker}")
+        return False
+    except SectionTextTooShortError as e:
+        logging.warning(f"Parsing \"{e.anchor_name}\" likely failed for {ticker}")
         return False
 
     with open(f"s1_{possible_section_names[0]}/{ticker}.html", "w") as f:
