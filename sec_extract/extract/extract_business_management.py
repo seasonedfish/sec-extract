@@ -179,11 +179,13 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_
 
 
 def main():
+    logging.basicConfig(level="DEBUG")
+    sys.setrecursionlimit(10000)  # Required to cast soup objects to strings
+
     tickers = [
         "DBTK", "SUN", "KRYS", "QMAR", "PLSE", "PFPT", "TRVN", "CIVI", "TXTR", "HUBS"
     ]
-    logging.basicConfig(level="DEBUG")
-    sys.setrecursionlimit(10000)  # Required to cast soup objects to strings
+
     for ticker in tickers:
         logging.info(f"Now extracting {ticker}")
         with open(f"../download/s1_html/{ticker}.html") as f:
