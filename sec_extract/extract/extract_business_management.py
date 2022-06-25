@@ -63,7 +63,7 @@ def is_start_anchor_for_different_section(tag, old_href) -> bool:
             # Checks that it's a link
             return False
 
-        if not (tag.text != "" and not tag.text.isdigit()):
+        if not (tag.text != "" and not tag.text.strip().isdigit()):
             # Checks that it's not a page number or other invalid link
             return False
 
@@ -159,7 +159,7 @@ def main():
             soup = BeautifulSoup(f, "html.parser")
 
         extract_section_and_save(soup, ticker, ["business", "what we do", "proposed business", "our business"])
-        extract_section_and_save(soup, ticker, ["management"])
+        extract_section_and_save(soup, ticker, ["management", "management and board of directors"])
 
 
 if __name__ == "__main__":
