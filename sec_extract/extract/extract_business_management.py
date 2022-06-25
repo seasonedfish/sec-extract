@@ -165,10 +165,10 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_
     try:
         section = extract_section(soup, possible_section_names)
     except (NoLinksFoundForAnySectionNameError, MissingNamedAnchorError, IncompatibleTableOfContentsError) as e:
-        logging.warning(f"{e} for {ticker}")
+        logging.warning(f"{e} for {ticker}, skipped")
         return False
     except SectionTextTooShortError as e:
-        logging.warning(f"Parsing \"{e.anchor_name}\" likely failed for {ticker}")
+        logging.warning(f"Parsing \"{e.anchor_name}\" likely failed for {ticker}, skipped")
         return False
 
     with open(f"s1_{possible_section_names[0]}/{ticker}.html", "w") as f:
