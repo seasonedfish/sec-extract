@@ -88,10 +88,16 @@ def is_start_anchor_for_different_section(tag, old_href) -> bool:
 def get_anchor_names(soup: BeautifulSoup, possible_section_names: list[str]) -> (str, str):
     try:
         start_anchor = soup.find(
-            functools.partial(is_start_anchor_for_section, possible_section_names=possible_section_names)
+            functools.partial(
+                is_start_anchor_for_section,
+                possible_section_names=possible_section_names
+            )
         )
         end_anchor = start_anchor.find_next(
-            functools.partial(is_start_anchor_for_different_section, old_href=start_anchor.attrs["href"])
+            functools.partial(
+                is_start_anchor_for_different_section,
+                old_href=start_anchor.attrs["href"]
+            )
         )
     except AttributeError:
         raise NoLinksFoundForAnySectionNameError(possible_section_names)
