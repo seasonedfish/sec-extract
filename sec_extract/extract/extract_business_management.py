@@ -1,4 +1,6 @@
+import csv
 import re
+from os import path
 
 from bs4 import BeautifulSoup, Tag
 import functools
@@ -162,6 +164,11 @@ def extract_section(soup: BeautifulSoup, possible_section_names: list[str]) -> s
 
 
 def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_names: list[str]) -> bool:
+    destination_path = f"s1_{possible_section_names[0]}/{ticker}.html"
+    if path.exists(destination_path):
+        logging.info(f"{destination_path} already exists, skipped")
+        return False
+
     try:
         section = extract_section(soup, possible_section_names)
     except (NoLinksFoundForAnySectionNameError, MissingNamedAnchorError, IncompatibleTableOfContentsError) as e:
@@ -171,7 +178,7 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_
         logging.warning(f"Parsing \"{e.anchor_name}\" likely failed for {ticker}, skipped")
         return False
 
-    with open(f"s1_{possible_section_names[0]}/{ticker}.html", "w") as f:
+    with open(destination_path, "w") as f:
         f.write(BEFORE)
         f.write(section)
         f.write(AFTER)
