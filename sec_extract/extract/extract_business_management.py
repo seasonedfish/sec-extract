@@ -41,7 +41,8 @@ class MissingNamedAnchorError(Exception):
 
 
 class IncompatibleTableOfContentsError(Exception):
-    pass
+    def __init__(self, message="Incompatible table of contents format", *args):
+        super().__init__(message, *args)
 
 
 class SectionTextTooShortError(Exception):
@@ -169,8 +170,8 @@ def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_
     except MissingNamedAnchorError as e:
         logging.warning(f"{e} for {ticker}")
         return False
-    except IncompatibleTableOfContentsError:
-        logging.warning(f"Incompatible table of contents for {ticker}")
+    except IncompatibleTableOfContentsError as e:
+        logging.warning(f"{e} for {ticker}")
         return False
     except SectionTextTooShortError as e:
         logging.warning(f"Parsing \"{e.anchor_name}\" likely failed for {ticker}")
