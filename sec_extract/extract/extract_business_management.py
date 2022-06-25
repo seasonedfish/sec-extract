@@ -42,15 +42,21 @@ class IncompatibleTableOfContentsError(Exception):
     pass
 
 
+def normalize_string(s: str) -> str:
+    """
+    Returns the string in lowercase, with trailing whitespace removed,
+    and with repeated whitespace condensed into single spaces.
+    """
+    return re.sub(r"\s\s+", " ", s.lower().strip())
+
+
 def is_start_anchor_for_section(tag, possible_section_names: list[str]) -> bool:
     try:
         if not (tag.name == "a" and "href" in tag.attrs):
             return False
 
         return any(
-            # Regex removes duplicate whitespace
-            # https://stackoverflow.com/a/1981366
-            re.sub(r"\s\s+", " ", tag.text.lower().strip()) == s
+            normalize_string(tag.text) == s
             for s in possible_section_names
         )
     except AttributeError:
@@ -63,7 +69,8 @@ def is_start_anchor_for_different_section(tag, old_href) -> bool:
             # Checks that it's a link
             return False
 
-        if not (tag.text != "" and not tag.text.strip().isdigit()):
+        normalized_text = normalize_string(tag.text)
+        if normalized_text.isdigit() or normalized_text == "":
             # Checks that it's not a page number or other invalid link
             return False
 
