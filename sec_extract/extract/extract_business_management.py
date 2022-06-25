@@ -30,12 +30,12 @@ class NoLinksFoundForAnySectionNameError(Exception):
 
 
 class MissingNamedAnchorError(Exception):
-    def __init__(self, section_name: str):
-        super().__init__(section_name)
-        self.section_name = section_name
+    def __init__(self, anchor_name: str):
+        super().__init__(anchor_name)
+        self.anchor_name = anchor_name
 
     def __str__(self):
-        return f"Missing named anchor for \"{self.section_name}\""
+        return f"Missing named anchor for \"{self.anchor_name}\""
 
 
 class IncompatibleTableOfContentsError(Exception):
