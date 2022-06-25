@@ -164,13 +164,7 @@ def extract_section(soup: BeautifulSoup, possible_section_names: list[str]) -> s
 def extract_section_and_save(soup: BeautifulSoup, ticker: str, possible_section_names: list[str]) -> bool:
     try:
         section = extract_section(soup, possible_section_names)
-    except NoLinksFoundForAnySectionNameError as e:
-        logging.warning(f"{e} for {ticker}")
-        return False
-    except MissingNamedAnchorError as e:
-        logging.warning(f"{e} for {ticker}")
-        return False
-    except IncompatibleTableOfContentsError as e:
+    except (NoLinksFoundForAnySectionNameError, MissingNamedAnchorError, IncompatibleTableOfContentsError) as e:
         logging.warning(f"{e} for {ticker}")
         return False
     except SectionTextTooShortError as e:
