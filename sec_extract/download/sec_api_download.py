@@ -3,8 +3,6 @@ import logging
 from collections import namedtuple
 from os import path
 
-from requests.exceptions import ConnectionError
-
 from sec_api import QueryApi, RenderApi
 from sec_extract.keys import SEC_API_KEY
 
@@ -40,7 +38,7 @@ def get_s1_url(ticker: str) -> str:
     }
     filings = QUERY_API.get_filings(query)
     try:
-        return filings["filings"][0]["linkToFilingDetails"]
+        return filings["filings"][0]["linkToFilingDetails"].replace("ix?doc=/", "")
     except IndexError:
         raise FormNotFoundError(f"No S-1 found for {ticker}")
 
@@ -60,7 +58,7 @@ def get_10k_url(ticker: str, year: int) -> str:
     }
     filings = QUERY_API.get_filings(query)
     try:
-        return filings["filings"][0]["linkToFilingDetails"]
+        return filings["filings"][0]["linkToFilingDetails"].replace("ix?doc=/", "")
     except IndexError:
         raise FormNotFoundError(f"No 10-K found for {ticker} in range {year_range}")
 
@@ -69,11 +67,7 @@ def download_html(url: str, destination_path: str) -> None:
     if path.exists(destination_path):
         return
 
-    try:
-        html_string = RENDER_API.get_filing(url)
-    except ConnectionError:
-        logging.warning(f"Could not download {url}")
-        return
+    html_string = RENDER_API.get_filing(url)
 
     with open(destination_path, "w") as f:
         f.write(html_string)
