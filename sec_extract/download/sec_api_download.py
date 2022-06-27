@@ -82,6 +82,9 @@ def download_all_s1s(firms: list[Firm]) -> None:
         except FormNotFoundError as e:
             logging.warning(e)
             continue
+        except ConnectionError as e:
+            logging.warning(e)
+            continue
         download_html(url_s1, destination_path)
 
 
@@ -100,6 +103,9 @@ def download_all_10ks(firms: list[Firm]) -> None:
             try:
                 url_10k = get_10k_url(firm.ticker_symbol, document_year)
             except FormNotFoundError as e:
+                logging.warning(e)
+                continue
+            except ConnectionError as e:
                 logging.warning(e)
                 continue
             download_html(url_10k, destination_path)
