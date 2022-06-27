@@ -64,9 +64,6 @@ def get_10k_url(ticker: str, year: int) -> str:
 
 
 def download_html(url: str, destination_path: str) -> None:
-    if path.exists(destination_path):
-        return
-
     html_string = RENDER_API.get_filing(url)
 
     with open(destination_path, "w") as f:
@@ -76,12 +73,16 @@ def download_html(url: str, destination_path: str) -> None:
 
 def download_all_s1s(firms: list[Firm]) -> None:
     for firm in firms:
+        destination_path = f"s1_html/{firm.ticker_symbol}.html"
+        if path.exists(destination_path):
+            continue
+
         try:
             url_s1 = get_s1_url(firm.ticker_symbol)
         except FormNotFoundError as e:
             logging.warning(e)
             continue
-        download_html(url_s1, f"s1_html/{firm.ticker_symbol}.html")
+        download_html(url_s1, destination_path)
 
 
 def download_all_10ks(firms: list[Firm]) -> None:
@@ -92,12 +93,16 @@ def download_all_10ks(firms: list[Firm]) -> None:
 
         for i in range(3, 6):
             document_year = int(firm.year) + i
+            destination_path = f"10k_html/{firm.ticker_symbol}{document_year}.html"
+            if path.exists(destination_path):
+                continue
+
             try:
                 url_10k = get_10k_url(firm.ticker_symbol, document_year)
             except FormNotFoundError as e:
                 logging.warning(e)
                 continue
-            download_html(url_10k, f"10k_html/{firm.ticker_symbol}{document_year}.html")
+            download_html(url_10k, destination_path)
 
 
 def main() -> None:
