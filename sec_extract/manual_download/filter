@@ -1,3 +1,0 @@
-#!/bin/sh
-grep "Could not download" warnings.csv | cut -d' ' -f4  > urls.csv
-gawk -i inplace { print "\""$0"\""}' urls.csv

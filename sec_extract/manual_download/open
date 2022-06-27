@@ -1,2 +1,0 @@
-#!/bin/sh
-cat download.csv | xargs -n1 open -a "Google Chrome"
