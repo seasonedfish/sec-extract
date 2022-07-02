@@ -18,7 +18,7 @@ class FormNotFoundError(Exception):
 
 Firm = namedtuple("Firm", ("ticker_symbol", "year", "cusip"))
 
-Form = namedtuple("Form", ("form_text", "basename"))
+Form = namedtuple("Form", ("text", "basename"))
 
 
 def get_firms() -> list[Firm]:
@@ -69,9 +69,9 @@ def get_10k_url(ticker: str, year: int) -> str:
 
 def get_s1(firm: Firm) -> Form:
     logging.info(f"Fetching S-1 for {firm.ticker_symbol}")
-    form_text = RENDER_API.get_filing(get_s1_url(firm.ticker_symbol))
+    text = RENDER_API.get_filing(get_s1_url(firm.ticker_symbol))
     basename = f"{firm.ticker_symbol}.html"
-    return Form(form_text, basename)
+    return Form(text, basename)
 
 
 def get_10k(firm: Firm, years_after_ipo: int) -> Form:
@@ -80,9 +80,9 @@ def get_10k(firm: Firm, years_after_ipo: int) -> Form:
 
     document_year = int(firm.year) + years_after_ipo
     logging.info(f"Fetching 10-K for {firm.ticker_symbol}, year {document_year}")
-    form_text = RENDER_API.get_filing(get_10k_url(firm.ticker_symbol, document_year))
+    text = RENDER_API.get_filing(get_10k_url(firm.ticker_symbol, document_year))
     basename = f"{firm.ticker_symbol}{document_year}.html"
-    return Form(form_text, basename)
+    return Form(text, basename)
 
 
 def save_to_file(s: str, destination_path: str) -> None:
@@ -105,7 +105,7 @@ def download_all_s1s(firms: list[Firm]) -> None:
 
             form = future.result()
             save_to_file(
-                form.form_text,
+                form.text,
                 f"s1_html/{form.basename}"
             )
 
@@ -125,7 +125,7 @@ def download_all_10ks(firms: list[Firm]) -> None:
 
             form = future.result()
             save_to_file(
-                form.form_text,
+                form.text,
                 f"10k_html/{form.basename}"
             )
 
