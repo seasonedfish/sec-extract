@@ -2,12 +2,16 @@ import csv
 import logging
 from collections import namedtuple
 from os import path
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import as_completed
 
 from sec_api import QueryApi, RenderApi
 from sec_extract.keys import SEC_API_KEY
 
 QUERY_API = QueryApi(SEC_API_KEY)
 RENDER_API = RenderApi(SEC_API_KEY)
+
+THREADS = 8
 
 
 class FormNotFoundError(Exception):
@@ -72,6 +76,25 @@ def download_html(url: str, destination_path: str) -> None:
 
 
 def download_all_s1s(firms: list[Firm]) -> None:
+    with ThreadPoolExecutor(THREADS) as executor:
+        futures = [
+            executor.submit(
+                lambda x: RENDER_API.get_filing(get_s1_url(x)),
+                firm
+            )
+            for firm in firms
+        ]
+
+        for future in as_completed(futures):
+            if future.exception():
+                logging.warning(future.exception())
+                continue
+
+            destination_path = f"s1_html/{firm.ticker_symbol}.html"
+            with open(destination_path, "w") as f:
+                f.write(future.result())
+            logging.info(f"Downloaded {destination_path}")
+
     for firm in firms:
         destination_path = f"s1_html/{firm.ticker_symbol}.html"
         if path.exists(destination_path):
