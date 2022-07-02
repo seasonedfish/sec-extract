@@ -75,9 +75,9 @@ def download_html(url: str, destination_path: str) -> None:
     logging.info(f"Downloaded {destination_path}")
 
 
-def get_s1(ticker: str) -> str:
-    logging.info(f"Fetching S-1 for {ticker}")
-    return RENDER_API.get_filing(get_s1_url(ticker))
+def get_s1(firm: Firm) -> str:
+    logging.info(f"Fetching S-1 for {firm.ticker_symbol}")
+    return RENDER_API.get_filing(get_s1_url(firm.ticker_symbol))
 
 
 def save_to_file(s: str, destination_path: str) -> None:
@@ -89,7 +89,7 @@ def save_to_file(s: str, destination_path: str) -> None:
 def download_all_s1s(firms: list[Firm]) -> None:
     with ThreadPoolExecutor(THREADS) as executor:
         futures = [
-            executor.submit(get_s1, firm.ticker_symbol)
+            executor.submit(get_s1, firm)
             for firm in firms
         ]
 
