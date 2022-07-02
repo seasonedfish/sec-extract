@@ -74,10 +74,14 @@ def get_s1(firm: Firm) -> str:
     return RENDER_API.get_filing(get_s1_url(firm.ticker_symbol))
 
 
-def get_10k(firm: Firm, year: int) -> Form:
-    logging.info(f"Fetching 10-K for {firm.ticker_symbol}, year {year}")
-    form_text = RENDER_API.get_filing(get_10k_url(firm.ticker_symbol, year))
-    basename = f"{firm.ticker_symbol}{year}.html"
+def get_10k(firm: Firm, years_after_ipo: int) -> Form:
+    if firm.year == "":
+        raise ValueError(f"Firm \"{firm.ticker_symbol}\" is missing IPO year")
+
+    document_year = int(firm.year) + years_after_ipo
+    logging.info(f"Fetching 10-K for {firm.ticker_symbol}, year {document_year}")
+    form_text = RENDER_API.get_filing(get_10k_url(firm.ticker_symbol, document_year))
+    basename = f"{firm.ticker_symbol}{document_year}.html"
     return Form(form_text, basename)
 
 
@@ -108,7 +112,7 @@ def download_all_s1s(firms: list[Firm]) -> None:
 def download_all_10ks(firms: list[Firm]) -> None:
     with ThreadPoolExecutor(THREADS) as executor:
         futures = [
-            executor.submit(get_10k, firm, int(firm.year) + i)
+            executor.submit(get_10k, firm, i)
             for i in range(3, 6)
             for firm in firms
         ]
