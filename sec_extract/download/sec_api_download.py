@@ -83,19 +83,16 @@ def get_s1(ticker: str) -> str:
 def download_all_s1s(firms: list[Firm]) -> None:
     with ThreadPoolExecutor(THREADS) as executor:
         futures = [
-            executor.submit(
-                get_s1,
-                firm.ticker_symbol
-            )
+            executor.submit(get_s1, firm.ticker_symbol)
             for firm in firms
         ]
 
-        for i, future in enumerate(as_completed(futures)):
+        for firm, future in zip(firms, futures):
             if future.exception():
                 logging.warning(future.exception())
                 continue
 
-            destination_path = f"s1_html/{i}.html"
+            destination_path = f"s1_html/{firm.ticker_symbol}.html"
             with open(destination_path, "w") as f:
                 f.write(future.result())
             logging.info(f"Downloaded {destination_path}")
