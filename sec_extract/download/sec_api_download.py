@@ -67,9 +67,11 @@ def get_10k_url(ticker: str, year: int) -> str:
         raise FormNotFoundError(f"No 10-K found for {ticker} in range {year_range}")
 
 
-def get_s1(firm: Firm) -> str:
+def get_s1(firm: Firm) -> Form:
     logging.info(f"Fetching S-1 for {firm.ticker_symbol}")
-    return RENDER_API.get_filing(get_s1_url(firm.ticker_symbol))
+    form_text = RENDER_API.get_filing(get_s1_url(firm.ticker_symbol))
+    basename = f"{firm.ticker_symbol}.html"
+    return Form(form_text, basename)
 
 
 def get_10k(firm: Firm, years_after_ipo: int) -> Form:
@@ -96,14 +98,15 @@ def download_all_s1s(firms: list[Firm]) -> None:
             for firm in firms
         ]
 
-        for firm, future in zip(firms, futures_list):
+        for future in futures_list:
             if future.exception():
                 logging.warning(future.exception())
                 continue
 
+            form = future.result()
             save_to_file(
-                future.result(),
-                f"s1_html/{firm.ticker_symbol}.html"
+                form.form_text,
+                f"s1_html/{form.basename}"
             )
 
 
@@ -131,7 +134,7 @@ def main() -> None:
     logging.basicConfig(level="INFO")
     firms = get_firms()
 
-    download_all_10ks(firms)
+    download_all_s1s(firms)
 
 
 if __name__ == "__main__":
