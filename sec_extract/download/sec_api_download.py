@@ -1,7 +1,7 @@
 import csv
 import logging
-from collections import namedtuple
 from concurrent import futures
+from typing import NamedTuple, Optional
 
 from sec_api import QueryApi, RenderApi
 from sec_extract.keys import SEC_API_KEY
@@ -16,16 +16,29 @@ class FormNotFoundError(Exception):
     pass
 
 
-Firm = namedtuple("Firm", ("ticker_symbol", "year", "cusip"))
+class Firm(NamedTuple):
+    ticker_symbol: str
+    year: Optional[int]
+    cusip: str
 
-Form = namedtuple("Form", ("text", "basename"))
+
+class Form(NamedTuple):
+    text: str
+    basename: str
 
 
 def get_firms() -> list[Firm]:
     with open("IPO Firm list 2005-2019.csv") as f:
         reader = csv.reader(f)
         reader.__next__()  # Skip first row
-        firms = [Firm(*row) for row in reader]
+        firms = [
+            Firm(
+                ticker_symbol=row[0],
+                year=int(row[1]) if row[1] != "" else None,
+                cusip=row[2]
+            )
+            for row in reader
+        ]
     return firms
 
 
@@ -75,10 +88,10 @@ def get_s1(firm: Firm) -> Form:
 
 
 def get_10k(firm: Firm, years_after_ipo: int) -> Form:
-    if firm.year == "":
+    if firm.year is None:
         raise ValueError(f"Firm \"{firm.ticker_symbol}\" is missing IPO year")
 
-    document_year = int(firm.year) + years_after_ipo
+    document_year = firm.year + years_after_ipo
     logging.info(f"Fetching 10-K for {firm.ticker_symbol}, year {document_year}")
     text = RENDER_API.get_filing(get_10k_url(firm.ticker_symbol, document_year))
     basename = f"{firm.ticker_symbol}{document_year}.html"
@@ -134,7 +147,7 @@ def main() -> None:
     logging.basicConfig(level="INFO")
     firms = get_firms()
 
-    download_all_s1s(firms)
+    download_all_10ks(firms)
 
 
 if __name__ == "__main__":
