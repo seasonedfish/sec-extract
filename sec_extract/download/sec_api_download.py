@@ -111,7 +111,7 @@ def download_all_s1s(firms: list[Firm]) -> None:
             for firm in firms
         ]
 
-        for future in futures_list:
+        for future in futures.as_completed(futures_list):
             if future.exception():
                 logging.warning(future.exception())
                 continue
@@ -131,7 +131,7 @@ def download_all_10ks(firms: list[Firm]) -> None:
             for i in range(3, 6)
         ]
 
-        for future in futures_list:
+        for future in futures.as_completed(futures_list):
             if future.exception() is not None:
                 logging.warning(future.exception())
                 continue
@@ -147,7 +147,7 @@ def main() -> None:
     logging.basicConfig(level="INFO")
     firms = get_firms()
 
-    download_all_10ks(firms)
+    download_all_s1s(firms)
 
 
 if __name__ == "__main__":
