@@ -127,8 +127,8 @@ def download_all_10ks(firms: list[Firm]) -> None:
     with futures.ThreadPoolExecutor(THREADS) as executor:
         futures_list = [
             executor.submit(get_10k, firm, i)
-            for i in range(3, 6)
             for firm in firms
+            for i in range(3, 6)
         ]
 
         for future in futures_list:
