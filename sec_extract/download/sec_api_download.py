@@ -1,9 +1,7 @@
 import csv
 import logging
 from collections import namedtuple
-from os import path
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
+from concurrent import futures
 
 from sec_api import QueryApi, RenderApi
 from sec_extract.keys import SEC_API_KEY
@@ -92,13 +90,13 @@ def save_to_file(s: str, destination_path: str) -> None:
 
 
 def download_all_s1s(firms: list[Firm]) -> None:
-    with ThreadPoolExecutor(THREADS) as executor:
-        futures = [
+    with futures.ThreadPoolExecutor(THREADS) as executor:
+        futures_list = [
             executor.submit(get_s1, firm)
             for firm in firms
         ]
 
-        for firm, future in zip(firms, futures):
+        for firm, future in zip(firms, futures_list):
             if future.exception():
                 logging.warning(future.exception())
                 continue
@@ -110,14 +108,14 @@ def download_all_s1s(firms: list[Firm]) -> None:
 
 
 def download_all_10ks(firms: list[Firm]) -> None:
-    with ThreadPoolExecutor(THREADS) as executor:
-        futures = [
+    with futures.ThreadPoolExecutor(THREADS) as executor:
+        futures_list = [
             executor.submit(get_10k, firm, i)
             for i in range(3, 6)
             for firm in firms
         ]
 
-        for future in futures:
+        for future in futures_list:
             if future.exception() is not None:
                 logging.warning(future.exception())
                 continue
