@@ -80,6 +80,12 @@ def get_s1(ticker: str) -> str:
     return RENDER_API.get_filing(get_s1_url(ticker))
 
 
+def save_to_file(s: str, destination_path: str) -> None:
+    with open(destination_path, "w") as f:
+        f.write(s)
+    logging.info(f"Saved {destination_path}")
+
+
 def download_all_s1s(firms: list[Firm]) -> None:
     with ThreadPoolExecutor(THREADS) as executor:
         futures = [
@@ -92,10 +98,10 @@ def download_all_s1s(firms: list[Firm]) -> None:
                 logging.warning(future.exception())
                 continue
 
-            destination_path = f"s1_html/{firm.ticker_symbol}.html"
-            with open(destination_path, "w") as f:
-                f.write(future.result())
-            logging.info(f"Downloaded {destination_path}")
+            save_to_file(
+                future.result(),
+                f"s1_html/{firm.ticker_symbol}.html"
+            )
 
 
 def download_all_10ks(firms: list[Firm]) -> None:
