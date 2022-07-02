@@ -75,40 +75,30 @@ def download_html(url: str, destination_path: str) -> None:
     logging.info(f"Downloaded {destination_path}")
 
 
+def get_s1(ticker: str) -> str:
+    logging.info(f"Fetching S-1 for {ticker}")
+    return RENDER_API.get_filing(get_s1_url(ticker))
+
+
 def download_all_s1s(firms: list[Firm]) -> None:
     with ThreadPoolExecutor(THREADS) as executor:
         futures = [
             executor.submit(
-                lambda x: RENDER_API.get_filing(get_s1_url(x)),
-                firm
+                get_s1,
+                firm.ticker_symbol
             )
             for firm in firms
         ]
 
-        for future in as_completed(futures):
+        for i, future in enumerate(as_completed(futures)):
             if future.exception():
                 logging.warning(future.exception())
                 continue
 
-            destination_path = f"s1_html/{firm.ticker_symbol}.html"
+            destination_path = f"s1_html/{i}.html"
             with open(destination_path, "w") as f:
                 f.write(future.result())
             logging.info(f"Downloaded {destination_path}")
-
-    for firm in firms:
-        destination_path = f"s1_html/{firm.ticker_symbol}.html"
-        if path.exists(destination_path):
-            continue
-
-        try:
-            url_s1 = get_s1_url(firm.ticker_symbol)
-        except FormNotFoundError as e:
-            logging.warning(e)
-            continue
-        except ConnectionError as e:
-            logging.warning(e)
-            continue
-        download_html(url_s1, destination_path)
 
 
 def download_all_10ks(firms: list[Firm]) -> None:
@@ -135,10 +125,10 @@ def download_all_10ks(firms: list[Firm]) -> None:
 
 
 def main() -> None:
+    logging.basicConfig(level="INFO")
     firms = get_firms()
 
     download_all_s1s(firms)
-    download_all_10ks(firms)
 
 
 if __name__ == "__main__":
