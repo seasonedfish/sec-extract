@@ -148,6 +148,7 @@ def main() -> None:
     firms = get_firms()
 
     download_all_s1s(firms)
+    download_all_10ks(firms)
 
 
 if __name__ == "__main__":
