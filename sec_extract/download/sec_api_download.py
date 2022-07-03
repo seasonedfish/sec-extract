@@ -1,7 +1,7 @@
 import csv
 import logging
-from collections import namedtuple
-from os import path
+from concurrent import futures
+from typing import NamedTuple, Optional
 
 from sec_api import QueryApi, RenderApi
 from sec_extract.keys import SEC_API_KEY
@@ -9,19 +9,36 @@ from sec_extract.keys import SEC_API_KEY
 QUERY_API = QueryApi(SEC_API_KEY)
 RENDER_API = RenderApi(SEC_API_KEY)
 
+THREADS = 8
+
 
 class FormNotFoundError(Exception):
     pass
 
 
-Firm = namedtuple("Firm", ("ticker_symbol", "year", "cusip"))
+class Firm(NamedTuple):
+    ticker_symbol: str
+    year: Optional[int]
+    cusip: str
+
+
+class Form(NamedTuple):
+    text: str
+    basename: str
 
 
 def get_firms() -> list[Firm]:
     with open("IPO Firm list 2005-2019.csv") as f:
         reader = csv.reader(f)
         reader.__next__()  # Skip first row
-        firms = [Firm(*row) for row in reader]
+        firms = [
+            Firm(
+                ticker_symbol=row[0],
+                year=int(row[1]) if row[1] != "" else None,
+                cusip=row[2]
+            )
+            for row in reader
+        ]
     return firms
 
 
@@ -63,55 +80,71 @@ def get_10k_url(ticker: str, year: int) -> str:
         raise FormNotFoundError(f"No 10-K found for {ticker} in range {year_range}")
 
 
-def download_html(url: str, destination_path: str) -> None:
-    html_string = RENDER_API.get_filing(url)
+def get_s1(firm: Firm) -> Form:
+    logging.info(f"Fetching S-1 for {firm.ticker_symbol}")
+    text = RENDER_API.get_filing(get_s1_url(firm.ticker_symbol))
+    basename = f"{firm.ticker_symbol}.html"
+    return Form(text, basename)
 
+
+def get_10k(firm: Firm, years_after_ipo: int) -> Form:
+    if firm.year is None:
+        raise ValueError(f"Firm \"{firm.ticker_symbol}\" is missing IPO year")
+
+    document_year = firm.year + years_after_ipo
+    logging.info(f"Fetching 10-K for {firm.ticker_symbol}, year {document_year}")
+    text = RENDER_API.get_filing(get_10k_url(firm.ticker_symbol, document_year))
+    basename = f"{firm.ticker_symbol}{document_year}.html"
+    return Form(text, basename)
+
+
+def save_to_file(s: str, destination_path: str) -> None:
     with open(destination_path, "w") as f:
-        f.write(html_string)
-    logging.info(f"Downloaded {destination_path}")
+        f.write(s)
+    logging.info(f"Saved {destination_path}")
 
 
 def download_all_s1s(firms: list[Firm]) -> None:
-    for firm in firms:
-        destination_path = f"s1_html/{firm.ticker_symbol}.html"
-        if path.exists(destination_path):
-            continue
+    with futures.ThreadPoolExecutor(THREADS) as executor:
+        futures_list = [
+            executor.submit(get_s1, firm)
+            for firm in firms
+        ]
 
-        try:
-            url_s1 = get_s1_url(firm.ticker_symbol)
-        except FormNotFoundError as e:
-            logging.warning(e)
-            continue
-        except ConnectionError as e:
-            logging.warning(e)
-            continue
-        download_html(url_s1, destination_path)
+        for future in futures.as_completed(futures_list):
+            if future.exception():
+                logging.warning(future.exception())
+                continue
+
+            form = future.result()
+            save_to_file(
+                form.text,
+                f"s1_html/{form.basename}"
+            )
 
 
 def download_all_10ks(firms: list[Firm]) -> None:
-    for firm in firms:
-        if firm.year == "":
-            logging.warning(f"No year found for {firm}")
-            continue
+    with futures.ThreadPoolExecutor(THREADS) as executor:
+        futures_list = [
+            executor.submit(get_10k, firm, i)
+            for firm in firms
+            for i in range(3, 6)
+        ]
 
-        for i in range(3, 6):
-            document_year = int(firm.year) + i
-            destination_path = f"10k_html/{firm.ticker_symbol}{document_year}.html"
-            if path.exists(destination_path):
+        for future in futures.as_completed(futures_list):
+            if future.exception() is not None:
+                logging.warning(future.exception())
                 continue
 
-            try:
-                url_10k = get_10k_url(firm.ticker_symbol, document_year)
-            except FormNotFoundError as e:
-                logging.warning(e)
-                continue
-            except ConnectionError as e:
-                logging.warning(e)
-                continue
-            download_html(url_10k, destination_path)
+            form = future.result()
+            save_to_file(
+                form.text,
+                f"10k_html/{form.basename}"
+            )
 
 
 def main() -> None:
+    logging.basicConfig(level="INFO")
     firms = get_firms()
 
     download_all_s1s(firms)
