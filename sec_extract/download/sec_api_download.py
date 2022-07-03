@@ -12,7 +12,7 @@ RENDER_API = RenderApi(SEC_API_KEY)
 THREADS = 8
 
 
-class FormNotFoundError(Exception):
+class FormURLNotFoundError(Exception):
     pass
 
 
@@ -57,7 +57,7 @@ def get_s1_url(ticker: str) -> str:
     try:
         return filings["filings"][0]["linkToFilingDetails"].replace("ix?doc=/", "")
     except IndexError:
-        raise FormNotFoundError(f"No S-1 found for {ticker}")
+        raise FormURLNotFoundError(f"No S-1 URL found for {ticker}")
 
 
 def get_10k_url(ticker: str, year: int) -> str:
@@ -77,7 +77,7 @@ def get_10k_url(ticker: str, year: int) -> str:
     try:
         return filings["filings"][0]["linkToFilingDetails"].replace("ix?doc=/", "")
     except IndexError:
-        raise FormNotFoundError(f"No 10-K found for {ticker} in range {year_range}")
+        raise FormURLNotFoundError(f"No 10-K URL found for {ticker} in range {year_range}")
 
 
 def get_s1(firm: Firm) -> Form:
