@@ -9,7 +9,9 @@ Repository for extracting data from S-1 and 10-K SEC forms.
 # Use this if you use Poetry
 poetry install
 poetry shell
-# Use this is you pip
+```
+```bash
+# Use this is you use pip
 python3 -m venv .venv
 source ./venv/bin/activate
 python3 -m pip install .
