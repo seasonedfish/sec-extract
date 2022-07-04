@@ -4,7 +4,7 @@ import re
 import sys
 from pathlib import Path
 
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup, Tag  # type: ignore
 
 BEFORE = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
@@ -99,7 +99,7 @@ def is_start_anchor_for_different_section(tag, old_href) -> bool:
         return False
 
 
-def get_anchor_names(soup: BeautifulSoup, possible_section_names: list[str]) -> (str, str):
+def get_anchor_names(soup: BeautifulSoup, possible_section_names: list[str]) -> tuple[str, str]:
     try:
         start_anchor = soup.find(
             functools.partial(
