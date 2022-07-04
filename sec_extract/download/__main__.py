@@ -1,8 +1,9 @@
 import csv
 import logging
 from concurrent import futures
-from typing import NamedTuple, Optional
 from importlib import resources
+from pathlib import Path
+from typing import NamedTuple, Optional
 
 from sec_api import QueryApi, RenderApi
 from sec_extract.keys import SEC_API_KEY
@@ -99,13 +100,16 @@ def get_10k(firm: Firm, years_after_ipo: int) -> Form:
     return Form(text, basename)
 
 
-def save_to_file(s: str, destination_path: str) -> None:
+def save_to_file(s: str, destination_path: Path) -> None:
     with open(destination_path, "w") as f:
         f.write(s)
     logging.info(f"Saved {destination_path}")
 
 
 def download_all_s1s(firms: list[Firm]) -> None:
+    output_directory = Path("./target/s1_html")
+    output_directory.mkdir(parents=True, exist_ok=True)
+
     with futures.ThreadPoolExecutor(THREADS) as executor:
         futures_list = [
             executor.submit(get_s1, firm)
@@ -120,11 +124,14 @@ def download_all_s1s(firms: list[Firm]) -> None:
             form = future.result()
             save_to_file(
                 form.text,
-                f"target/s1_html/{form.basename}"
+                output_directory.joinpath(form.basename)
             )
 
 
 def download_all_10ks(firms: list[Firm]) -> None:
+    output_directory = Path("./target/10k_html")
+    output_directory.mkdir(parents=True, exist_ok=True)
+
     with futures.ThreadPoolExecutor(THREADS) as executor:
         futures_list = [
             executor.submit(get_10k, firm, i)
@@ -140,7 +147,7 @@ def download_all_10ks(firms: list[Firm]) -> None:
             form = future.result()
             save_to_file(
                 form.text,
-                f"target/10k_html/{form.basename}"
+                output_directory.joinpath(form.basename)
             )
 
 
