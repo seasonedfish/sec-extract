@@ -11,8 +11,6 @@ from sec_extract.keys import SEC_API_KEY
 QUERY_API = QueryApi(SEC_API_KEY)
 RENDER_API = RenderApi(SEC_API_KEY)
 
-THREADS = 8
-
 
 class FormURLNotFoundError(Exception):
     pass
@@ -110,7 +108,7 @@ def download_all_s1s(firms: list[Firm]) -> None:
     output_directory = Path("./target/s1_html")
     output_directory.mkdir(parents=True, exist_ok=True)
 
-    with futures.ThreadPoolExecutor(THREADS) as executor:
+    with futures.ThreadPoolExecutor() as executor:
         futures_list = [
             executor.submit(get_s1, firm)
             for firm in firms
@@ -132,7 +130,7 @@ def download_all_10ks(firms: list[Firm]) -> None:
     output_directory = Path("./target/10k_html")
     output_directory.mkdir(parents=True, exist_ok=True)
 
-    with futures.ThreadPoolExecutor(THREADS) as executor:
+    with futures.ThreadPoolExecutor() as executor:
         futures_list = [
             executor.submit(get_10k, firm, i)
             for firm in firms
