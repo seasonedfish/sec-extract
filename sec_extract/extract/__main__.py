@@ -163,8 +163,11 @@ def extract_section(soup: BeautifulSoup, possible_section_names: list[str]) -> s
 
 
 def extract_section_and_save(soup: BeautifulSoup, basename: str, possible_section_names: list[str]) -> bool:
-    destination_path = f"s1_{possible_section_names[0]}/{basename}"
-    if Path(destination_path).exists():
+    output_directory = Path(f"./target/s1_{possible_section_names[0]}")
+    output_directory.mkdir(parents=True, exist_ok=True)
+
+    destination_path = output_directory.joinpath(basename)
+    if destination_path.exists():
         logging.info(f"{destination_path} already exists, skipped")
         return False
 
@@ -187,7 +190,7 @@ def extract_section_and_save(soup: BeautifulSoup, basename: str, possible_sectio
 def main():
     sys.setrecursionlimit(10000)  # Required to cast soup objects to strings
 
-    paths = Path("../download/s1_html/").glob("*.html")
+    paths = Path("./target/s1_html/").glob("*.html")
 
     for path in paths:
         logging.info(f"Now extracting {path}")
