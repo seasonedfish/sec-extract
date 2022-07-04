@@ -5,7 +5,7 @@ from importlib import resources
 from pathlib import Path
 from typing import NamedTuple, Optional
 
-from sec_api import QueryApi, RenderApi
+from sec_api import QueryApi, RenderApi  # type: ignore
 from sec_extract.keys import SEC_API_KEY
 
 QUERY_API = QueryApi(SEC_API_KEY)
