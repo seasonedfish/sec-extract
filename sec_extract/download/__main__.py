@@ -2,6 +2,7 @@ import csv
 import logging
 from concurrent import futures
 from typing import NamedTuple, Optional
+from importlib import resources
 
 from sec_api import QueryApi, RenderApi
 from sec_extract.keys import SEC_API_KEY
@@ -28,7 +29,7 @@ class Form(NamedTuple):
 
 
 def get_firms() -> list[Firm]:
-    with open("IPO Firm list 2005-2019.csv") as f:
+    with resources.open_text("sec_extract.resources", "IPO Firm list 2005-2019.csv") as f:
         reader = csv.reader(f)
         reader.__next__()  # Skip first row
         firms = [
@@ -119,7 +120,7 @@ def download_all_s1s(firms: list[Firm]) -> None:
             form = future.result()
             save_to_file(
                 form.text,
-                f"s1_html/{form.basename}"
+                f"target/s1_html/{form.basename}"
             )
 
 
@@ -139,7 +140,7 @@ def download_all_10ks(firms: list[Firm]) -> None:
             form = future.result()
             save_to_file(
                 form.text,
-                f"10k_html/{form.basename}"
+                f"target/10k_html/{form.basename}"
             )
 
 
