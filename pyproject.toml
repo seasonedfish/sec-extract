@@ -9,6 +9,7 @@ python = "^3.8"
 requests = "^2.27.1"
 bs4 = "^0.0.1"
 termcolor = "^1.1.0"
+sec-api = "^1.0.12"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
