@@ -35,6 +35,17 @@ To run (only run after running `download` first):
 1. From the project root directory, run `python3 -m sec_extract.extract`.
 The extracted sections will be in `./target`.
 
-## GNU Parallel
+## Rendering PDFs
+The output HTML documents can be rendered to PDFs using the included `convert_pdf` script.
+This script requires Google Chrome and GNU Parallel.
+
+On macOS, you will need a `google-chrome` script on your PATH with the following contents (or similar):
+```shell
+#!/bin/sh
+exec /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome ${1+"$@"}
+```
+
+GNU Parallel is cited below:
+
 Tange, O. (2022, March 22). GNU Parallel 20220322 ('Маріу́поль').
   Zenodo. https://doi.org/10.5281/zenodo.6377950
