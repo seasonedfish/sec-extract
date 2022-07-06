@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+function chrome_pdf() {
+  google-chrome --headless --print-to-pdf=$2 --print-to-pdf-no-header $1 2> /dev/null
+}
+export -f chrome_pdf
+
+cd target
+parallel --progress chrome_pdf {} pdf/{.}.pdf ::: */*.html

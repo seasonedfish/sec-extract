@@ -34,3 +34,7 @@ This package contains the code for extracting the business and management sectio
 To run (only run after running `download` first):
 1. From the project root directory, run `python3 -m sec_extract.extract`.
 The extracted sections will be in `./target`.
+
+## GNU Parallel
+Tange, O. (2022, March 22). GNU Parallel 20220322 ('Маріу́поль').
+  Zenodo. https://doi.org/10.5281/zenodo.6377950
