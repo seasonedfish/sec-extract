@@ -6,4 +6,4 @@ function chrome_pdf() {
 export -f chrome_pdf
 
 cd target
-parallel --progress chrome_pdf {} pdf/{.}.pdf ::: */*.html
+parallel --progress chrome_pdf {} pdf/{.}.pdf ::: 10k_html/* s1_business/* s1_management/*
